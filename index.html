@@ -67,7 +67,7 @@ function point(side,reason='Bola no chão'){if(!['rally','serve'].includes(phase
 function trajectory(x,y,targetX,targetY,t){ballV.set((targetX-x)/t,(targetY-y+.5*G*t*t)/t,0)}
 function launch(a,type,strength=.66,chosen='mid'){const side=sideOf(a),sign=signOf(side),serve=type==='serve',block=type==='block';if(serve){if(Math.abs(a.x)<9.25){point(1-side,'Falta de saque · pisou na linha');return false}ball.position.set(a.x+sign*.32,1.9+a.y,0)}else{if(lastActor===a&&shotType!=='block'&&!block){point(1-side,'Dois toques consecutivos');return false}if(!block&&touches[side]>=3){point(1-side,'Quatro toques');return false}}
  const x=ball.position.x,y=ball.position.y,partner=teammate(a),quality=serve?1:clamp(1-Math.abs(x-a.x)*.30, .55,1);
- const accurate=clamp(strength,.43,1),error=(strength-.66)*4.5+(1-quality)*(Math.random()-.35)*1.8;let targetX,targetY=R,duration;
+ const error=(strength-.66)*4.5+(1-quality)*(Math.random()-.35)*1.8;let targetX,targetY=R,duration;
  planned=null;
  if(type==='pass'||type==='set'){
   if(touches[side]>=2){targetX=sign*(chosen==='short'?2.1:chosen==='deep'?7.4:4.8);duration=1.65+(.75-strength)*.5;}
@@ -95,7 +95,7 @@ function tick(dt){elapsed+=dt;if(performance.now()>toastUntil)$('toast').classLi
   hm=moveAI(H,hTarget,dt,4.7);let rivalActive=planned===Q?Q:planned===O?O:touches[1]===0?(Math.abs(target-O.x)<Math.abs(target-Q.x)?O:Q):lastActor===O?Q:O;
   om=moveAI(O,rivalActive===O&&courtSide===1?target:Q.x<3?5.5:2.1,dt,3.5+stage*.6);qm=moveAI(Q,rivalActive===Q&&courtSide===1?target:O.x<3?5.8:2.2,dt,3.6+stage*.55);
   roundTime+=dt;const oldX=ball.position.x,oldY=ball.position.y;ballV.y-=G*dt;ball.position.addScaledVector(ballV,dt);ball.rotation.z-=ballV.x*dt*1.7;
-  if(oldX*ball.position.x<=0&&Math.abs(oldX-ball.position.x)>.00001&&netLock<=0){const fraction=Math.abs(oldX)/(Math.abs(oldX)+Math.abs(ball.position.x));const netY=oldY+(ball.position.y-oldY)*fraction;if(netY<1.24-R){point(1-lastHit,'Bola por baixo da rede')}else if(netY<NET+R){ball.position.x=oldX<0?-.26:.26;ballV.x*=-.36;ballV.y*=.66;netLock=.23;planned=null;status('Tocou na rede · bola ainda viva')}else{courtSide=ball.position.x<0?0:1;touches[courtSide]=0;lastActor=null;planned=null}}
+  if(oldX*ball.position.x<=0&&Math.abs(oldX-ball.position.x)>.00001 ){const fraction=Math.abs(oldX)/(Math.abs(oldX)+Math.abs(ball.position.x));const netY=oldY+(ball.position.y-oldY)*fraction;if(netY<1.24-R){point(1-lastHit,'Bola por baixo da rede')}else if(netY<NET+R){ball.position.x=oldX<0?-.26:.26;ballV.x*=-.36;ballV.y*=.66;netLock=.23;planned=null;status('Tocou na rede · bola ainda viva')}else{courtSide=ball.position.x<0?0:1;touches[courtSide]=0;lastActor=null;planned=null}}
   if(phase==='rally'&&ball.position.y<=R){point(Math.abs(ball.position.x)>9+R?(1-lastHit):(ball.position.x<0?1:0),Math.abs(ball.position.x)>9+R?'Bola fora':'Bola dentro')}
   else if(phase==='rally'&&(Math.abs(ball.position.x)>16||roundTime>15)){point(1-lastHit,'Bola fora')}
   else if(phase==='rally'&&hitLock<=0){
